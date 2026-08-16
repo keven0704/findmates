@@ -1,0 +1,2275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>找搭子 - 发现身边的有趣活动</title>
+    <style>
+        /* ============ 全局样式 ============ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #f65858;
+            --primary-dark: #e04848;
+            --primary-light: #fff0f0;
+            --secondary: #00a2c7;
+            --text-dark: #1a1a1a;
+            --text-gray: #666;
+            --text-light: #999;
+            --bg: #f7f7f7;
+            --white: #fff;
+            --border: #e8e8e8;
+            --shadow: 0 2px 12px rgba(0,0,0,0.08);
+            --shadow-hover: 0 4px 20px rgba(0,0,0,0.15);
+            --radius: 12px;
+            --radius-sm: 8px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: var(--bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+        }
+
+        input, textarea, select {
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        /* ============ 导航栏 ============ */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--white);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+            padding: 0 24px;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-gray);
+            font-size: 15px;
+            font-weight: 500;
+            padding: 8px 4px;
+            transition: color 0.2s;
+            position: relative;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--primary);
+        }
+
+        .nav-links a.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 3px;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn {
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(246,88,88,0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-light);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            opacity: 0.9;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* ============ 定位功能 ============ */
+        .location-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg);
+            border-radius: 20px;
+            padding: 6px 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--border);
+            font-size: 13px;
+            color: var(--text-gray);
+        }
+
+        .location-bar:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .location-bar .location-icon {
+            font-size: 14px;
+        }
+
+        .location-bar .location-text {
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .location-bar.loading {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .location-bar.error {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .nearby-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--secondary);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-left: 6px;
+        }
+
+        .distance-text {
+            font-size: 12px;
+            color: var(--secondary);
+            font-weight: 500;
+        }
+
+        .location-permission {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-hover);
+            padding: 20px;
+            z-index: 1000;
+            max-width: 320px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .location-permission.show {
+            display: block;
+        }
+
+        .location-permission h4 {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .location-permission p {
+            font-size: 13px;
+            color: var(--text-gray);
+            margin-bottom: 16px;
+        }
+
+        .location-permission .btn {
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .location-permission .btn:last-child {
+            margin-bottom: 0;
+        }
+
+        /* ============ 主内容区 ============ */
+
+        .main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+            min-height: calc(100vh - 64px - 200px);
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ============ 首页 Hero ============ */
+        .hero {
+            background: linear-gradient(135deg, #f65858 0%, #ff8a5c 50%, #ffb347 100%);
+            border-radius: var(--radius);
+            padding: 60px 48px;
+            color: white;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: 30%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 50%;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero p {
+            font-size: 18px;
+            opacity: 0.95;
+            margin-bottom: 32px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-search {
+            display: flex;
+            gap: 12px;
+            max-width: 600px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-search input {
+            flex: 1;
+            padding: 14px 20px;
+            border-radius: 30px;
+            border: none;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .hero-search button {
+            padding: 14px 32px;
+            border-radius: 30px;
+            background: var(--text-dark);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .hero-search button:hover {
+            background: #333;
+            transform: scale(1.02);
+        }
+
+        /* ============ 分类标签 ============ */
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-title .view-all {
+            font-size: 14px;
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+
+        .category-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--border);
+        }
+
+        .category-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary);
+        }
+
+        .category-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .category-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .category-count {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+
+        /* ============ 活动卡片 ============ */
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .event-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid var(--border);
+        }
+
+        .event-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .event-card-image {
+            height: 160px;
+            background: linear-gradient(135deg, #f65858, #ff8a5c);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+
+        .event-card-image.green { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+        .event-card-image.blue { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .event-card-image.purple { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+        .event-card-image.orange { background: linear-gradient(135deg, #f39c12, #e67e22); }
+        .event-card-image.teal { background: linear-gradient(135deg, #1abc9c, #16a085); }
+        .event-card-image.pink { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+
+        .event-card-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            backdrop-filter: blur(4px);
+        }
+
+        .event-card-body {
+            padding: 16px;
+        }
+
+        .event-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .event-card-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-gray);
+        }
+
+        .event-card-meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .event-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-top: 1px solid var(--border);
+            background: #fafafa;
+        }
+
+        .event-card-price {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .event-card-price.free {
+            color: #27ae60;
+        }
+
+        .event-card-attendees {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        /* ============ 活动详情页 ============ */
+        .detail-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .detail-header {
+            background: var(--white);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .detail-banner {
+            height: 240px;
+            background: linear-gradient(135deg, #f65858, #ff8a5c);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+        }
+
+        .detail-banner.green { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+        .detail-banner.blue { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .detail-banner.purple { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+        .detail-banner.orange { background: linear-gradient(135deg, #f39c12, #e67e22); }
+        .detail-banner.teal { background: linear-gradient(135deg, #1abc9c, #16a085); }
+        .detail-banner.pink { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+
+        .detail-content {
+            padding: 32px;
+        }
+
+        .detail-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .detail-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .detail-info-item {
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+        }
+
+        .detail-info-label {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+
+        .detail-info-value {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .detail-description {
+            margin-bottom: 24px;
+        }
+
+        .detail-description h3 {
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+
+        .detail-description p {
+            color: var(--text-gray);
+            line-height: 1.8;
+        }
+
+        .detail-organizer {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px;
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            margin-bottom: 24px;
+        }
+
+        .detail-organizer .avatar {
+            width: 48px;
+            height: 48px;
+            font-size: 18px;
+        }
+
+        .detail-organizer-info h4 {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .detail-organizer-info p {
+            font-size: 13px;
+            color: var(--text-gray);
+        }
+
+        .detail-actions {
+            display: flex;
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .detail-actions .btn {
+            padding: 12px 32px;
+            font-size: 16px;
+        }
+
+        .attendees-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .attendee-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+        }
+
+        .attendee-item .avatar {
+            width: 24px;
+            height: 24px;
+            font-size: 11px;
+        }
+
+        /* ============ 活动列表页 ============ */
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .list-header h2 {
+            font-size: 24px;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .filter-bar input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .filter-bar input:focus {
+            border-color: var(--primary);
+        }
+
+        .filter-bar select {
+            padding: 10px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            outline: none;
+            background: var(--white);
+            cursor: pointer;
+        }
+
+        .filter-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        /* 距离范围筛选 */
+        .distance-filter {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            background: var(--white);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+
+        .distance-filter-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-gray);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .distance-filter .filter-tag {
+            padding: 4px 14px;
+            font-size: 12px;
+        }
+
+        .distance-filter .filter-tag.active {
+            background: var(--secondary);
+            border-color: var(--secondary);
+        }
+
+        .distance-filter .filter-tag:hover {
+            border-color: var(--secondary);
+            color: var(--secondary);
+        }
+
+        .distance-filter .filter-tag.active:hover {
+            color: white;
+        }
+
+        .nearby-section {
+            margin-bottom: 40px;
+        }
+
+        .nearby-section .section-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nearby-section .section-title .nearby-icon {
+            font-size: 24px;
+        }
+
+        .nearby-location-info {
+            font-size: 13px;
+            color: var(--text-gray);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nearby-location-info .location-name {
+            font-weight: 600;
+            color: var(--secondary);
+        }
+
+        .nearby-location-info .btn-locate {
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 16px;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nearby-location-info .btn-locate:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+
+
+        .filter-tag {
+            padding: 6px 16px;
+            border-radius: 20px;
+            background: var(--white);
+            border: 1px solid var(--border);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-tag:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .filter-tag.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-light);
+        }
+
+        .empty-state .empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: var(--text-gray);
+        }
+
+        /* ============ 创建活动页 ============ */
+        .create-container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .create-container h2 {
+            font-size: 28px;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+        }
+
+        .form-group label .required {
+            color: var(--primary);
+            margin-left: 4px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            outline: none;
+            transition: border-color 0.2s;
+            background: var(--white);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: var(--primary);
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 16px;
+            margin-top: 32px;
+        }
+
+        .form-actions .btn {
+            padding: 12px 32px;
+            font-size: 16px;
+        }
+
+        .category-select {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 8px;
+        }
+
+        .category-option {
+            padding: 10px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+        }
+
+        .category-option:hover {
+            border-color: var(--primary);
+        }
+
+        .category-option.selected {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* ============ 个人中心 ============ */
+        .profile-header {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .profile-header .avatar {
+            width: 80px;
+            height: 80px;
+            font-size: 32px;
+        }
+
+        .profile-info h2 {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .profile-info p {
+            color: var(--text-gray);
+            font-size: 14px;
+        }
+
+        .profile-stats {
+            display: flex;
+            gap: 32px;
+            margin-left: auto;
+        }
+
+        .profile-stat {
+            text-align: center;
+        }
+
+        .profile-stat .number {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .profile-stat .label {
+            font-size: 13px;
+            color: var(--text-gray);
+        }
+
+        .profile-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0;
+        }
+
+        .profile-tab {
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-gray);
+            background: none;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+
+        .profile-tab:hover {
+            color: var(--primary);
+        }
+
+        .profile-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        /* ============ 页脚 ============ */
+        .footer {
+            background: #2d2d2d;
+            color: #999;
+            padding: 40px 24px;
+            margin-top: 40px;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 32px;
+        }
+
+        .footer h4 {
+            color: white;
+            margin-bottom: 16px;
+            font-size: 16px;
+        }
+
+        .footer ul {
+            list-style: none;
+        }
+
+        .footer ul li {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .footer ul li a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 32px auto 0;
+            padding-top: 24px;
+            border-top: 1px solid #444;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        /* ============ Toast 提示 ============ */
+        .toast {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: var(--text-dark);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.success {
+            background: #27ae60;
+        }
+
+        .toast.error {
+            background: var(--primary);
+        }
+
+        /* ============ 响应式 ============ */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                padding: 40px 24px;
+            }
+
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .hero-search {
+                flex-direction: column;
+            }
+
+            .form-row,
+            .form-row-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-stats {
+                margin-left: 0;
+            }
+
+            .detail-actions {
+                flex-direction: column;
+            }
+
+            .detail-actions .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast 提示 -->
+    <div id="toast" class="toast"></div>
+
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-left">
+                <a href="#" class="logo" onclick="showPage('home')">
+                    <span class="logo-icon">🤝</span>
+                    找搭子
+                </a>
+                <ul class="nav-links">
+                    <li><a href="#" data-page="home" class="active" onclick="showPage('home')">首页</a></li>
+                    <li><a href="#" data-page="events" onclick="showPage('events')">发现活动</a></li>
+                    <li><a href="#" data-page="create" onclick="showPage('create')">创建活动</a></li>
+                    <li><a href="#" data-page="profile" onclick="showPage('profile')">个人中心</a></li>
+                </ul>
+            </div>
+            <div class="nav-right">
+                <div class="location-bar" id="locationBar" onclick="requestLocation()" title="点击定位">
+                    <span class="location-icon">📍</span>
+                    <span class="location-text" id="locationText">点击定位</span>
+                </div>
+                <button class="btn btn-primary" onclick="showPage('create')">+ 发起活动</button>
+                <div class="avatar" onclick="showPage('profile')">张</div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 定位权限弹窗 -->
+    <div class="location-permission" id="locationPermission">
+        <h4>📍 开启定位</h4>
+        <p>开启定位后，可以查看附近的活动，并自动填充活动地点。</p>
+        <button class="btn btn-primary" onclick="requestLocation()">允许定位</button>
+        <button class="btn btn-outline" onclick="closeLocationPermission()">暂不开启</button>
+    </div>
+
+
+    <!-- 主内容区 -->
+    <main class="main">
+        <!-- ============ 首页 ============ -->
+        <div id="page-home" class="page active">
+            <!-- Hero 区域 -->
+            <div class="hero">
+                <h1>发现身边的有趣活动</h1>
+                <p>找到志同道合的搭子，一起参加感兴趣的活动</p>
+                <div class="hero-search">
+                    <input type="text" id="heroSearchInput" placeholder="搜索活动、兴趣、关键词..." onkeydown="if(event.key==='Enter')heroSearch()">
+                    <button onclick="heroSearch()">搜索</button>
+                </div>
+            </div>
+
+            <!-- 附近活动 -->
+            <div class="nearby-section" id="nearbySection" style="display:none;">
+                <div class="section-title">
+                    <span class="nearby-icon">📍</span>
+                    <span>附近活动</span>
+                    <a href="#" class="view-all" onclick="goToNearbyEvents()">按距离排序 →</a>
+                </div>
+                <div class="nearby-location-info" id="nearbyLocationInfo"></div>
+                <div class="events-grid" id="nearbyEvents"></div>
+            </div>
+
+            <!-- 分类 -->
+            <div class="section-title">
+                <span>热门分类</span>
+                <a href="#" class="view-all" onclick="showPage('events')">查看全部 →</a>
+            </div>
+            <div class="categories" id="homeCategories"></div>
+
+            <!-- 热门活动 -->
+            <div class="section-title">
+                <span>🔥 热门活动</span>
+                <a href="#" class="view-all" onclick="showPage('events')">查看全部 →</a>
+            </div>
+            <div class="events-grid" id="homeEvents"></div>
+
+            <!-- 即将开始 -->
+            <div class="section-title">
+                <span>📅 即将开始</span>
+                <a href="#" class="view-all" onclick="showPage('events')">查看全部 →</a>
+            </div>
+            <div class="events-grid" id="upcomingEvents"></div>
+
+        </div>
+
+        <!-- ============ 活动列表页 ============ -->
+        <div id="page-events" class="page">
+            <div class="list-header">
+                <h2>发现活动</h2>
+                <button class="btn btn-primary" onclick="showPage('create')">+ 发起活动</button>
+            </div>
+
+            <div class="filter-bar">
+                <input type="text" id="searchInput" placeholder="搜索活动名称或描述..." oninput="filterEvents()">
+                <select id="categoryFilter" onchange="filterEvents()">
+                    <option value="">全部分类</option>
+                </select>
+                <select id="sortFilter" onchange="filterEvents()">
+                    <option value="latest">最新发布</option>
+                    <option value="popular">最受欢迎</option>
+                    <option value="soonest">即将开始</option>
+                    <option value="nearby">📍 附近活动</option>
+                </select>
+
+            </div>
+
+            <div class="filter-tags" id="filterTags"></div>
+
+            <!-- 距离范围筛选 -->
+            <div class="distance-filter" id="distanceFilter" style="display:none;">
+                <span class="distance-filter-label">📍 距离范围</span>
+                <span class="filter-tag active" data-distance="0" onclick="setDistanceFilter(0)">全部</span>
+                <span class="filter-tag" data-distance="5" onclick="setDistanceFilter(5)">5km内</span>
+                <span class="filter-tag" data-distance="10" onclick="setDistanceFilter(10)">10km内</span>
+                <span class="filter-tag" data-distance="20" onclick="setDistanceFilter(20)">20km内</span>
+                <span class="filter-tag" data-distance="50" onclick="setDistanceFilter(50)">50km内</span>
+            </div>
+
+            <div class="events-grid" id="allEvents"></div>
+
+            <div class="empty-state" id="eventsEmpty" style="display:none;">
+                <div class="empty-icon">🔍</div>
+                <h3>没有找到相关活动</h3>
+                <p>换个关键词试试，或者发起一个新活动吧！</p>
+            </div>
+        </div>
+
+        <!-- ============ 活动详情页 ============ -->
+        <div id="page-detail" class="page">
+            <div class="detail-container" id="detailContainer"></div>
+        </div>
+
+        <!-- ============ 创建活动页 ============ -->
+        <div id="page-create" class="page">
+            <div class="create-container">
+                <h2>发起新活动</h2>
+                <form id="createForm" onsubmit="handleCreate(event)">
+                    <div class="form-group">
+                        <label>活动标题<span class="required">*</span></label>
+                        <input type="text" id="createTitle" placeholder="例如：周末一起去爬山" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>活动分类<span class="required">*</span></label>
+                        <div class="category-select" id="createCategory"></div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>活动日期<span class="required">*</span></label>
+                            <input type="date" id="createDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>活动时间<span class="required">*</span></label>
+                            <input type="time" id="createTime" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>活动地点<span class="required">*</span></label>
+                            <input type="text" id="createLocation" placeholder="例如：市中心公园" required>
+                        </div>
+                        <div class="form-group">
+                            <label>人数上限</label>
+                            <input type="number" id="createCapacity" placeholder="例如：20" min="2" max="500">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>费用（元）</label>
+                            <input type="number" id="createPrice" placeholder="0 表示免费" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label>活动图标</label>
+                            <select id="createIcon">
+                                <option value="🎯">🎯 运动</option>
+                                <option value="🎮">🎮 游戏</option>
+                                <option value="📚">📚 学习</option>
+                                <option value="🎨">🎨 艺术</option>
+                                <option value="🎵">🎵 音乐</option>
+                                <option value="🍜">🍜 美食</option>
+                                <option value="🏔️">🏔️ 户外</option>
+                                <option value="💼">💼 职业</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>活动描述<span class="required">*</span></label>
+                        <textarea id="createDescription" placeholder="详细描述活动内容、注意事项等..." required></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">发布活动</button>
+                        <button type="button" class="btn btn-outline" onclick="showPage('home')">取消</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ============ 个人中心 ============ -->
+        <div id="page-profile" class="page">
+            <div class="profile-header">
+                <div class="avatar">张</div>
+                <div class="profile-info">
+                    <h2>张同学</h2>
+                    <p>📍 北京 · 加入于 2025年</p>
+                </div>
+                <div class="profile-stats">
+                    <div class="profile-stat">
+                        <div class="number" id="statCreated">0</div>
+                        <div class="label">发起活动</div>
+                    </div>
+                    <div class="profile-stat">
+                        <div class="number" id="statJoined">0</div>
+                        <div class="label">参加活动</div>
+                    </div>
+                    <div class="profile-stat">
+                        <div class="number" id="statInterested">0</div>
+                        <div class="label">感兴趣</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-tabs">
+                <button class="profile-tab active" data-tab="created" onclick="switchProfileTab('created')">我发起的</button>
+                <button class="profile-tab" data-tab="joined" onclick="switchProfileTab('joined')">我参加的</button>
+                <button class="profile-tab" data-tab="interested" onclick="switchProfileTab('interested')">我感兴趣的</button>
+            </div>
+
+            <div class="events-grid" id="profileEvents"></div>
+            <div class="empty-state" id="profileEmpty" style="display:none;">
+                <div class="empty-icon">📋</div>
+                <h3>暂无相关活动</h3>
+                <p>去发现一些有趣的活动吧！</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div>
+                <h4>🤝 找搭子</h4>
+                <p style="font-size:14px;">发现身边的有趣活动，找到志同道合的搭子</p>
+            </div>
+            <div>
+                <h4>关于我们</h4>
+                <ul>
+                    <li><a href="#">关于找搭子</a></li>
+                    <li><a href="#">加入我们</a></li>
+                    <li><a href="#">联系我们</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>帮助中心</h4>
+                <ul>
+                    <li><a href="#">帮助文档</a></li>
+                    <li><a href="#">常见问题</a></li>
+                    <li><a href="#">活动规则</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>关注我们</h4>
+                <ul>
+                    <li><a href="#">微信公众号</a></li>
+                    <li><a href="#">微博</a></li>
+                    <li><a href="#">抖音</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            © 2025 找搭子 · 发现身边的有趣活动
+        </div>
+    </footer>
+
+    <script>
+        // ============ 数据定义 ============
+        const categories = [
+            { id: 'sports', name: '运动健身', icon: '🏃', color: 'green' },
+            { id: 'games', name: '游戏娱乐', icon: '🎮', color: 'purple' },
+            { id: 'study', name: '学习交流', icon: '📚', color: 'blue' },
+            { id: 'art', name: '艺术创作', icon: '🎨', color: 'pink' },
+            { id: 'music', name: '音乐演出', icon: '🎵', color: 'orange' },
+            { id: 'food', name: '美食探店', icon: '🍜', color: 'teal' },
+            { id: 'outdoor', name: '户外旅行', icon: '🏔️', color: 'green' },
+            { id: 'career', name: '职业发展', icon: '💼', color: 'blue' }
+        ];
+
+        const categoryColors = {
+            'sports': 'green',
+            'games': 'purple',
+            'study': 'blue',
+            'art': 'pink',
+            'music': 'orange',
+            'food': 'teal',
+            'outdoor': 'green',
+            'career': 'blue'
+        };
+
+        const categoryIcons = {
+            'sports': '🏃',
+            'games': '🎮',
+            'study': '📚',
+            'art': '🎨',
+            'music': '🎵',
+            'food': '🍜',
+            'outdoor': '🏔️',
+            'career': '💼'
+        };
+
+        // 模拟数据
+        let events = [
+            {
+                id: 1,
+                title: '周末城市徒步 - 探索老城区',
+                category: 'outdoor',
+                date: '2025-08-20',
+                time: '09:00',
+                location: '老城区文化广场',
+                capacity: 20,
+                price: 0,
+                description: '一起漫步在老城区的街头巷尾，感受历史的韵味。我们会经过多个历史建筑和特色小店，全程约3小时，适合所有体力水平的朋友参加。\n\n集合地点：老城区文化广场正门\n注意事项：请穿舒适的鞋子，自带饮用水',
+                organizer: '张同学',
+                attendees: ['李同学', '王同学', '赵同学', '陈同学', '刘同学'],
+                interested: 12,
+                createdAt: '2025-08-10',
+                icon: '🏔️'
+            },
+            {
+                id: 2,
+                title: '周末羽毛球友谊赛',
+                category: 'sports',
+                date: '2025-08-22',
+                time: '14:00',
+                location: '市体育馆羽毛球馆',
+                capacity: 12,
+                price: 15,
+                description: '周末来一场酣畅淋漓的羽毛球比赛吧！无论你是新手还是老手，都可以找到合适的对手。我们会根据水平分组，保证每个人都有良好的体验。\n\n场地费用AA制，每人15元\n请自备球拍和运动装备',
+                organizer: '李同学',
+                attendees: ['张同学', '王同学', '赵同学', '陈同学'],
+                interested: 8,
+                createdAt: '2025-08-12',
+                icon: '🏸'
+            },
+            {
+                id: 3,
+                title: '英语角 - 每周口语练习',
+                category: 'study',
+                date: '2025-08-18',
+                time: '19:00',
+                location: '城市图书馆三楼',
+                capacity: 15,
+                price: 0,
+                description: '每周一次的英语角活动，欢迎所有想提高英语口语的朋友参加。我们会围绕不同主题进行讨论，还有有趣的游戏环节。\n\n本期主题：旅行经历分享\n适合水平：初级到中级',
+                organizer: '王同学',
+                attendees: ['张同学', '李同学', '赵同学', '陈同学', '刘同学', '孙同学'],
+                interested: 20,
+                createdAt: '2025-08-08',
+                icon: '📚'
+            },
+            {
+                id: 4,
+                title: '周末桌游聚会',
+                category: 'games',
+                date: '2025-08-24',
+                time: '13:00',
+                location: '桌游吧（市中心店）',
+                capacity: 8,
+                price: 30,
+                description: '周末来一场桌游聚会吧！我们会玩狼人杀、三国杀、UNO等经典桌游，还有各种新桌游等你来体验。\n\n费用包含场地费和桌游使用费\n欢迎新手，会有老玩家带你入门',
+                organizer: '赵同学',
+                attendees: ['张同学', '李同学', '王同学', '陈同学'],
+                interested: 15,
+                createdAt: '2025-08-14',
+                icon: '🎲'
+            },
+            {
+                id: 5,
+                title: '城市摄影外拍活动',
+                category: 'art',
+                date: '2025-08-25',
+                time: '16:00',
+                location: '滨江公园',
+                capacity: 10,
+                price: 0,
+                description: '一起在黄昏时分拍摄城市美景！无论你是专业摄影师还是手机摄影爱好者，都可以参加。我们会分享摄影技巧，互相交流作品。\n\n建议携带：相机或手机\n拍摄主题：城市黄昏',
+                organizer: '陈同学',
+                attendees: ['张同学', '李同学', '王同学'],
+                interested: 10,
+                createdAt: '2025-08-15',
+                icon: '📷'
+            },
+            {
+                id: 6,
+                title: '美食探店 - 隐藏的宝藏小店',
+                category: 'food',
+                date: '2025-08-23',
+                time: '11:30',
+                location: '美食街集合',
+                capacity: 6,
+                price: 50,
+                description: '一起探索城市里那些隐藏的美食小店！我们会走访3-4家口碑极佳的小店，品尝各种特色美食。\n\n费用为预估人均消费\n欢迎美食爱好者加入',
+                organizer: '刘同学',
+                attendees: ['张同学', '李同学', '赵同学'],
+                interested: 18,
+                createdAt: '2025-08-13',
+                icon: '🍜'
+            },
+            {
+                id: 7,
+                title: '周末爬山 - 登顶城市最高峰',
+                category: 'outdoor',
+                date: '2025-08-30',
+                time: '07:00',
+                location: '城市森林公园入口',
+                capacity: 15,
+                price: 0,
+                description: '周末一起挑战城市最高峰！全程约4小时，难度适中。山顶风景绝佳，可以俯瞰整个城市。\n\n请穿登山鞋或运动鞋\n自带水和干粮\n建议携带防晒用品',
+                organizer: '孙同学',
+                attendees: ['张同学', '李同学', '王同学', '赵同学', '陈同学'],
+                interested: 25,
+                createdAt: '2025-08-16',
+                icon: '⛰️'
+            },
+            {
+                id: 8,
+                title: '编程学习小组 - 前端入门',
+                category: 'study',
+                date: '2025-08-21',
+                time: '19:30',
+                location: '创客空间',
+                capacity: 10,
+                price: 0,
+                description: '零基础前端入门学习小组，一起学习HTML、CSS和JavaScript。我们会通过实际项目来学习，每周一次。\n\n适合人群：对编程感兴趣的零基础朋友\n请自带笔记本电脑',
+                organizer: '张同学',
+                attendees: ['李同学', '王同学', '赵同学'],
+                interested: 14,
+                createdAt: '2025-08-11',
+                icon: '💻'
+            }
+        ];
+
+        // 用户状态
+        let userState = {
+            created: [1, 8],
+            joined: [2, 3],
+            interested: [5, 7]
+        };
+
+        let currentProfileTab = 'created';
+        let selectedCategory = '';
+
+        // ============ 定位功能 ============
+        let userLocation = null; // 用户位置 {lat, lng}
+        let locationName = '';   // 位置名称
+
+        // 活动位置坐标（模拟数据，使用北京各区域坐标）
+        const eventLocations = {
+            1: { lat: 39.9042, lng: 116.4074, name: '老城区文化广场' },
+            2: { lat: 39.9290, lng: 116.3956, name: '市体育馆' },
+            3: { lat: 39.9163, lng: 116.3972, name: '城市图书馆' },
+            4: { lat: 39.9087, lng: 116.3975, name: '市中心桌游吧' },
+            5: { lat: 39.9389, lng: 116.4540, name: '滨江公园' },
+            6: { lat: 39.9042, lng: 116.4074, name: '美食街' },
+            7: { lat: 39.9847, lng: 116.3183, name: '城市森林公园' },
+            8: { lat: 39.9087, lng: 116.3975, name: '创客空间' }
+        };
+
+        // 请求定位
+        function requestLocation() {
+            const locationBar = document.getElementById('locationBar');
+            const locationText = document.getElementById('locationText');
+
+            if (!navigator.geolocation) {
+                locationText.textContent = '浏览器不支持定位';
+                locationBar.classList.add('error');
+                showToast('您的浏览器不支持定位功能', 'error');
+                return;
+            }
+
+            locationBar.classList.add('loading');
+            locationText.textContent = '正在定位...';
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    userLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+
+                    // 尝试获取位置名称（使用反向地理编码）
+                    reverseGeocode(userLocation.lat, userLocation.lng);
+
+                    locationBar.classList.remove('loading');
+                    locationBar.classList.remove('error');
+                    locationText.textContent = '已定位 ✓';
+                    locationBar.title = `纬度: ${userLocation.lat.toFixed(4)}, 经度: ${userLocation.lng.toFixed(4)}`;
+
+                    closeLocationPermission();
+                    showToast('定位成功！可以查看附近的活动了', 'success');
+
+                    // 刷新附近活动
+                    if (document.getElementById('page-home').classList.contains('active')) {
+                        renderNearbyEvents();
+                    }
+                    if (document.getElementById('page-events').classList.contains('active')) {
+                        filterEvents();
+                    }
+
+                },
+                function(error) {
+                    locationBar.classList.remove('loading');
+                    locationBar.classList.add('error');
+                    locationText.textContent = '定位失败';
+
+                    let message = '定位失败';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            message = '您拒绝了定位权限';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            message = '无法获取位置信息';
+                            break;
+                        case error.TIMEOUT:
+                            message = '定位超时，请重试';
+                            break;
+                    }
+                    showToast(message, 'error');
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+            );
+        }
+
+        // 反向地理编码（使用免费API获取位置名称）
+        function reverseGeocode(lat, lng) {
+            // 使用 OpenStreetMap Nominatim 免费反向地理编码服务
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10&accept-language=zh`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.address) {
+                        const city = data.address.city || data.address.town || data.address.county || '';
+                        const district = data.address.suburb || data.address.district || '';
+                        locationName = district ? `${city} ${district}` : city;
+                        document.getElementById('locationText').textContent = locationName;
+                        document.getElementById('locationBar').title = locationName;
+                    }
+                })
+                .catch(() => {
+                    // 如果反向地理编码失败，显示坐标
+                    document.getElementById('locationText').textContent = 
+                        `${userLocation.lat.toFixed(2)}, ${userLocation.lng.toFixed(2)}`;
+                });
+        }
+
+        // 关闭定位权限弹窗
+        function closeLocationPermission() {
+            document.getElementById('locationPermission').classList.remove('show');
+        }
+
+        // 计算两个坐标之间的距离（公里）
+        function calculateDistance(lat1, lng1, lat2, lng2) {
+            const R = 6371; // 地球半径（公里）
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLng/2) * Math.sin(dLng/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        // 获取活动距离
+        function getEventDistance(event) {
+            if (!userLocation) return null;
+            const loc = eventLocations[event.id];
+            if (!loc) return null;
+            return calculateDistance(userLocation.lat, userLocation.lng, loc.lat, loc.lng);
+        }
+
+        // 格式化距离
+        function formatDistance(distance) {
+            if (distance === null) return '';
+            if (distance < 1) {
+                return `${Math.round(distance * 1000)}m`;
+            }
+            return `${distance.toFixed(1)}km`;
+        }
+
+
+        // ============ 页面切换 ============
+        function showPage(pageName) {
+            // 隐藏所有页面
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            // 显示目标页面
+            document.getElementById('page-' + pageName).classList.add('active');
+
+            // 更新导航栏状态
+            document.querySelectorAll('.nav-links a').forEach(a => {
+                a.classList.remove('active');
+                if (a.dataset.page === pageName) {
+                    a.classList.add('active');
+                }
+            });
+
+            // 根据页面刷新数据
+            if (pageName === 'home') {
+                renderHome();
+            } else if (pageName === 'events') {
+                renderEventsPage();
+            } else if (pageName === 'profile') {
+                renderProfile();
+            } else if (pageName === 'create') {
+                initCreateForm();
+            }
+
+            window.scrollTo(0, 0);
+        }
+
+        // ============ Toast 提示 ============
+        function showToast(message, type = '') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast show ' + type;
+            setTimeout(() => {
+                toast.className = 'toast';
+            }, 3000);
+        }
+
+        // ============ 首页渲染 ============
+        function renderHome() {
+            // 渲染分类
+            const categoriesContainer = document.getElementById('homeCategories');
+            categoriesContainer.innerHTML = categories.map(cat => {
+                const count = events.filter(e => e.category === cat.id).length;
+                return `
+                    <div class="category-card" onclick="goToCategory('${cat.id}')">
+                        <div class="category-icon">${cat.icon}</div>
+                        <div class="category-name">${cat.name}</div>
+                        <div class="category-count">${count} 个活动</div>
+                    </div>
+                `;
+            }).join('');
+
+            // 渲染附近活动（如果已定位）
+            renderNearbyEvents();
+
+            // 热门活动（按参与人数排序）
+            const popular = [...events].sort((a, b) => b.attendees.length - a.attendees.length).slice(0, 4);
+            document.getElementById('homeEvents').innerHTML = popular.map(e => createEventCard(e)).join('');
+
+            // 即将开始（按日期排序）
+            const upcoming = [...events].sort((a, b) => a.date.localeCompare(b.date)).slice(0, 4);
+            document.getElementById('upcomingEvents').innerHTML = upcoming.map(e => createEventCard(e)).join('');
+        }
+
+        // 渲染首页附近活动
+        function renderNearbyEvents() {
+            const nearbySection = document.getElementById('nearbySection');
+            const nearbyLocationInfo = document.getElementById('nearbyLocationInfo');
+            const nearbyEventsContainer = document.getElementById('nearbyEvents');
+
+            if (!userLocation) {
+                nearbySection.style.display = 'none';
+                return;
+            }
+
+            // 显示附近活动区域
+            nearbySection.style.display = 'block';
+
+            // 显示位置信息
+            const locName = locationName || `${userLocation.lat.toFixed(2)}, ${userLocation.lng.toFixed(2)}`;
+            nearbyLocationInfo.innerHTML = `
+                <span>📍 当前位置：<span class="location-name">${locName}</span></span>
+                <button class="btn-locate" onclick="requestLocation()">重新定位</button>
+            `;
+
+            // 按距离排序，取最近的4个活动
+            const nearbyEvents = events
+                .map(e => ({ event: e, distance: getEventDistance(e) }))
+                .filter(item => item.distance !== null)
+                .sort((a, b) => a.distance - b.distance)
+                .slice(0, 4);
+
+            if (nearbyEvents.length === 0) {
+                nearbyEventsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📍</div>
+                        <h3>附近暂无活动</h3>
+                        <p>去发现更多活动，或者发起一个新活动吧！</p>
+                    </div>
+                `;
+            } else {
+                nearbyEventsContainer.innerHTML = nearbyEvents.map(item => createEventCard(item.event)).join('');
+            }
+        }
+
+        // 跳转到活动列表并按距离排序
+        function goToNearbyEvents() {
+            showPage('events');
+            document.getElementById('sortFilter').value = 'nearby';
+            filterEvents();
+        }
+
+
+        function goToCategory(categoryId) {
+            selectedCategory = categoryId;
+            showPage('events');
+            document.getElementById('categoryFilter').value = categoryId;
+            filterEvents();
+        }
+
+        // ============ 活动卡片 ============
+        function createEventCard(event) {
+            const color = categoryColors[event.category] || 'green';
+            const icon = event.icon || categoryIcons[event.category] || '🎯';
+            const priceText = event.price === 0 ? '<span class="event-card-price free">免费</span>' : `<span class="event-card-price">¥${event.price}</span>`;
+            const dateStr = formatDate(event.date);
+            const timeStr = event.time;
+            const attendeesCount = event.attendees.length;
+            const capacityText = event.capacity ? `/${event.capacity}` : '';
+            
+            // 显示距离信息（如果已定位）
+            const distance = getEventDistance(event);
+            const distanceText = distance !== null ? 
+                `<span class="distance-text">📍 ${formatDistance(distance)}</span>` : '';
+
+            return `
+                <div class="event-card" onclick="showDetail(${event.id})">
+                    <div class="event-card-image ${color}">
+                        <span>${icon}</span>
+                        <span class="event-card-badge">${getCategoryName(event.category)}</span>
+                    </div>
+                    <div class="event-card-body">
+                        <div class="event-card-title">${event.title}</div>
+                        <div class="event-card-meta">
+                            <span>📅 ${dateStr} ${timeStr}</span>
+                            <span>📍 ${event.location}</span>
+                        </div>
+                    </div>
+                    <div class="event-card-footer">
+                        ${priceText}
+                        <span class="event-card-attendees">${distanceText} 👥 ${attendeesCount}${capacityText} 人</span>
+                    </div>
+                </div>
+            `;
+        }
+
+
+        function getCategoryName(categoryId) {
+            const cat = categories.find(c => c.id === categoryId);
+            return cat ? cat.name : '其他';
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+            const weekday = weekdays[date.getDay()];
+            return `${month}月${day}日 ${weekday}`;
+        }
+
+        // ============ 活动列表页 ============
+        function renderEventsPage() {
+            // 填充分类筛选
+            const categorySelect = document.getElementById('categoryFilter');
+            categorySelect.innerHTML = '<option value="">全部分类</option>' + categories.map(c => 
+                `<option value="${c.id}">${c.name}</option>`
+            ).join('');
+
+            // 渲染筛选标签
+            const filterTags = document.getElementById('filterTags');
+            filterTags.innerHTML = categories.map(cat => `
+                <span class="filter-tag ${selectedCategory === cat.id ? 'active' : ''}" 
+                      onclick="toggleCategoryFilter('${cat.id}')">${cat.icon} ${cat.name}</span>
+            `).join('');
+
+            if (selectedCategory) {
+                categorySelect.value = selectedCategory;
+            }
+
+            // 根据是否已定位来显示/隐藏距离范围筛选
+            const distanceFilter = document.getElementById('distanceFilter');
+            if (userLocation) {
+                distanceFilter.style.display = 'flex';
+            } else {
+                distanceFilter.style.display = 'none';
+            }
+
+            filterEvents();
+        }
+
+
+        function toggleCategoryFilter(categoryId) {
+            selectedCategory = selectedCategory === categoryId ? '' : categoryId;
+            renderEventsPage();
+        }
+
+        // 距离范围筛选状态
+        let distanceFilterValue = 0;
+
+        // 设置距离范围筛选
+        function setDistanceFilter(distance) {
+            distanceFilterValue = distance;
+            // 更新标签选中状态
+            document.querySelectorAll('#distanceFilter .filter-tag').forEach(tag => {
+                tag.classList.toggle('active', parseInt(tag.dataset.distance) === distance);
+            });
+            filterEvents();
+        }
+
+        function filterEvents() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const category = document.getElementById('categoryFilter').value;
+            const sortBy = document.getElementById('sortFilter').value;
+
+            let filtered = events.filter(e => {
+                const matchesSearch = e.title.toLowerCase().includes(searchTerm) || 
+                                     e.description.toLowerCase().includes(searchTerm) ||
+                                     e.location.toLowerCase().includes(searchTerm);
+                const matchesCategory = !category || e.category === category;
+                return matchesSearch && matchesCategory;
+            });
+
+            // 距离范围筛选（如果已定位且选择了距离范围）
+            if (userLocation && distanceFilterValue > 0) {
+                filtered = filtered.filter(e => {
+                    const dist = getEventDistance(e);
+                    return dist !== null && dist <= distanceFilterValue;
+                });
+            }
+
+            // 排序
+            if (sortBy === 'popular') {
+                filtered.sort((a, b) => b.attendees.length - a.attendees.length);
+            } else if (sortBy === 'soonest') {
+                filtered.sort((a, b) => a.date.localeCompare(b.date));
+            } else if (sortBy === 'nearby') {
+                // 附近活动排序
+                if (!userLocation) {
+                    showToast('请先开启定位功能', 'error');
+                    document.getElementById('locationPermission').classList.add('show');
+                    // 如果没有定位，按默认排序
+                    filtered.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+                } else {
+                    filtered.sort((a, b) => {
+                        const distA = getEventDistance(a);
+                        const distB = getEventDistance(b);
+                        if (distA === null && distB === null) return 0;
+                        if (distA === null) return 1;
+                        if (distB === null) return -1;
+                        return distA - distB;
+                    });
+                }
+            } else {
+                filtered.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+            }
+
+            const container = document.getElementById('allEvents');
+            const empty = document.getElementById('eventsEmpty');
+
+            if (filtered.length === 0) {
+                container.innerHTML = '';
+                empty.style.display = 'block';
+            } else {
+                container.innerHTML = filtered.map(e => createEventCard(e)).join('');
+                empty.style.display = 'none';
+            }
+        }
+
+
+
+        function heroSearch() {
+            const term = document.getElementById('heroSearchInput').value;
+            showPage('events');
+            document.getElementById('searchInput').value = term;
+            filterEvents();
+        }
+
+        // ============ 活动详情页 ============
+        function showDetail(eventId) {
+            const event = events.find(e => e.id === eventId);
+            if (!event) return;
+
+            const color = categoryColors[event.category] || 'green';
+            const icon = event.icon || categoryIcons[event.category] || '🎯';
+            const priceText = event.price === 0 ? '免费' : `¥${event.price}`;
+            const isJoined = userState.joined.includes(event.id);
+            const isInterested = userState.interested.includes(event.id);
+            const isCreated = userState.created.includes(event.id);
+
+            const container = document.getElementById('detailContainer');
+            container.innerHTML = `
+                <div class="detail-header">
+                    <div class="detail-banner ${color}">${icon}</div>
+                    <div class="detail-content">
+                        <div class="detail-title">${event.title}</div>
+                        <div class="detail-info-grid">
+                            <div class="detail-info-item">
+                                <div class="detail-info-label">📅 时间</div>
+                                <div class="detail-info-value">${formatDate(event.date)} ${event.time}</div>
+                            </div>
+                            <div class="detail-info-item">
+                                <div class="detail-info-label">📍 地点</div>
+                                <div class="detail-info-value">${event.location}</div>
+                            </div>
+                            <div class="detail-info-item">
+                                <div class="detail-info-label">👥 人数</div>
+                                <div class="detail-info-value">${event.attendees.length}${event.capacity ? '/' + event.capacity : ''} 人</div>
+                            </div>
+                            <div class="detail-info-item">
+                                <div class="detail-info-label">💰 费用</div>
+                                <div class="detail-info-value">${priceText}</div>
+                            </div>
+                        </div>
+
+                        <div class="detail-description">
+                            <h3>活动详情</h3>
+                            <p>${event.description.replace(/\n/g, '<br>')}</p>
+                        </div>
+
+                        <div class="detail-organizer">
+                            <div class="avatar">${event.organizer.charAt(0)}</div>
+                            <div class="detail-organizer-info">
+                                <h4>${event.organizer}</h4>
+                                <p>活动发起人</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 style="font-size:18px;margin-bottom:12px;">已报名成员 (${event.attendees.length})</h3>
+                            <div class="attendees-list">
+                                ${event.attendees.map(name => `
+                                    <div class="attendee-item">
+                                        <div class="avatar">${name.charAt(0)}</div>
+                                        ${name}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <div class="detail-actions">
+                            ${isCreated ? 
+                                `<button class="btn btn-outline" onclick="deleteEvent(${event.id})">删除活动</button>` :
+                                isJoined ? 
+                                `<button class="btn btn-outline" onclick="cancelJoin(${event.id})">取消报名</button>` :
+                                `<button class="btn btn-primary" onclick="joinEvent(${event.id})">立即报名</button>`
+                            }
+                            <button class="btn ${isInterested ? 'btn-secondary' : 'btn-outline'}" onclick="toggleInterest(${event.id})">
+                                ${isInterested ? '❤️ 已感兴趣' : '🤍 感兴趣'}
+                            </button>
+                            <button class="btn btn-outline" onclick="showPage('events')">返回列表</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            showPage('detail');
+        }
+
+        function joinEvent(eventId) {
+            const event = events.find(e => e.id === eventId);
+            if (!event) return;
+
+            if (event.capacity && event.attendees.length >= event.capacity) {
+                showToast('活动人数已满', 'error');
+                return;
+            }
+
+            if (!userState.joined.includes(eventId)) {
+                userState.joined.push(eventId);
+                event.attendees.push('张同学');
+                showToast('报名成功！', 'success');
+            }
+            showDetail(eventId);
+        }
+
+        function cancelJoin(eventId) {
+            const event = events.find(e => e.id === eventId);
+            if (!event) return;
+
+            userState.joined = userState.joined.filter(id => id !== eventId);
+            event.attendees = event.attendees.filter(name => name !== '张同学');
+            showToast('已取消报名');
+            showDetail(eventId);
+        }
+
+        function toggleInterest(eventId) {
+            const index = userState.interested.indexOf(eventId);
+            if (index > -1) {
+                userState.interested.splice(index, 1);
+                showToast('已取消感兴趣');
+            } else {
+                userState.interested.push(eventId);
+                showToast('已标记为感兴趣', 'success');
+            }
+            showDetail(eventId);
+        }
+
+        function deleteEvent(eventId) {
+            if (!confirm('确定要删除这个活动吗？')) return;
+            events = events.filter(e => e.id !== eventId);
+            userState.created = userState.created.filter(id => id !== eventId);
+            showToast('活动已删除');
+            showPage('events');
+        }
+
+        // ============ 创建活动 ============
+        function initCreateForm() {
+            // 渲染分类选择
+            const container = document.getElementById('createCategory');
+            container.innerHTML = categories.map(cat => `
+                <div class="category-option" data-category="${cat.id}" onclick="selectCategory('${cat.id}')">
+                    ${cat.icon} ${cat.name}
+                </div>
+            `).join('');
+
+            // 设置默认日期为今天
+            const today = new Date();
+            const dateStr = today.toISOString().split('T')[0];
+            document.getElementById('createDate').value = dateStr;
+        }
+
+        function selectCategory(categoryId) {
+            document.querySelectorAll('.category-option').forEach(el => {
+                el.classList.toggle('selected', el.dataset.category === categoryId);
+            });
+        }
+
+        function handleCreate(event) {
+            event.preventDefault();
+
+            const title = document.getElementById('createTitle').value.trim();
+            const selectedCat = document.querySelector('.category-option.selected');
+            const date = document.getElementById('createDate').value;
+            const time = document.getElementById('createTime').value;
+            const location = document.getElementById('createLocation').value.trim();
+            const capacity = parseInt(document.getElementById('createCapacity').value) || 0;
+            const price = parseFloat(document.getElementById('createPrice').value) || 0;
+            const icon = document.getElementById('createIcon').value;
+            const description = document.getElementById('createDescription').value.trim();
+
+            if (!selectedCat) {
+                showToast('请选择活动分类', 'error');
+                return;
+            }
+
+            const newEvent = {
+                id: events.length + 1,
+                title: title,
+                category: selectedCat.dataset.category,
+                date: date,
+                time: time,
+                location: location,
+                capacity: capacity,
+                price: price,
+                description: description,
+                organizer: '张同学',
+                attendees: ['张同学'],
+                interested: 0,
+                createdAt: new Date().toISOString().split('T')[0],
+                icon: icon
+            };
+
+            events.unshift(newEvent);
+            userState.created.push(newEvent.id);
+
+            showToast('活动发布成功！', 'success');
+            document.getElementById('createForm').reset();
+            showDetail(newEvent.id);
+        }
+
+        // ============ 个人中心 ============
+        function switchProfileTab(tab) {
+            currentProfileTab = tab;
+            document.querySelectorAll('.profile-tab').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === tab);
+            });
+            renderProfile();
+        }
+
+        function renderProfile() {
+            // 更新统计
+            document.getElementById('statCreated').textContent = userState.created.length;
+            document.getElementById('statJoined').textContent = userState.joined.length;
+            document.getElementById('statInterested').textContent = userState.interested.length;
+
+            let eventIds = [];
+            if (currentProfileTab === 'created') {
+                eventIds = userState.created;
+            } else if (currentProfileTab === 'joined') {
+                eventIds = userState.joined;
+            } else {
+                eventIds = userState.interested;
+            }
+
+            const profileEvents = events.filter(e => eventIds.includes(e.id));
+            const container = document.getElementById('profileEvents');
+            const empty = document.getElementById('profileEmpty');
+
+            if (profileEvents.length === 0) {
+                container.innerHTML = '';
+                empty.style.display = 'block';
+            } else {
+                container.innerHTML = profileEvents.map(e => createEventCard(e)).join('');
+                empty.style.display = 'none';
+            }
+        }
+
+        // ============ 初始化 ============
+        document.addEventListener('DOMContentLoaded', function() {
+            renderHome();
+        });
+    </script>
+</body>
+</html>
